@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>バズ予測ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px;
+    }
+    input, button, #file {
+      padding: 10px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>バズ予測ツール</h1>
+  <textarea id="text" placeholder="投稿を入れてね" rows="4" cols="40" oninput="countChars()"></textarea>
+  <p>文字数: <span id="charCount">0</span></p>
+  <input type="file" id="file">
+  <button onclick="predict()">予測する</button>
+  <p id="result"></p>
+
+  <script>
+    function countChars() {
+      const text = document.getElementById("text").value;
+      document.getElementById("charCount").textContent = text.length;
+    }
+
+    function predict() {
+      let text = document.getElementById("text").value;
+      let file = document.getElementById("file").files.length;
+      let likes = 50; // 基本値
+
+      // お得系ワード
+      if (text.includes("無料") || text.includes("プレゼント")) {
+        likes += 30;
+      }
+
+      // 短文はバズりやすい
+      if (text.length < 20) {
+        likes += 20;
+      }
+
+      // ハッシュタグがあるとバズりやすい
+      if (text.includes("#")) {
+        likes += 10;
+      }
+
+      // ポジティブワード
+      const positiveWords = ["最高", "すごい", "楽しい", "素敵", "かわいい", "美味しい"];
+      positiveWords.forEach(word => {
+        if (text.includes(word)) {
+          likes += 15;
+        }
+      });
+
+      // 画像がある場合、バズりやすい
+      if (file > 0) {
+        likes += 40;
+      }
+
+      // 曜日補正
+      const now = new Date();
+      const day = now.getDay(); // 0:日曜日, 5:金曜日, 6:土曜日
+      if (day === 5 || day === 6) {
+        likes += 25;
+      }
+
+      document.getElementById("result").innerHTML = "予測いいね数: " + likes;
+    }
+  </script>
+</body>
+</html>
