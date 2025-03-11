@@ -9,68 +9,93 @@
       font-family: Arial, sans-serif;
       text-align: center;
       margin: 50px;
+      background: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
     }
-    input, button, #file {
+    input, button {
       padding: 10px;
       margin: 5px;
+    }
+    button {
+      background-color: #6200EA;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #3700B3;
+      transform: scale(1.1);
+    }
+    #result {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FF1744;
+      animation: pop 0.5s ease-in-out;
+      margin-top: 20px;
+    }
+    canvas {
+      max-width: 500px;
+      margin: auto;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
   <h1>バズ予測ツール</h1>
-  <textarea id="text" placeholder="投稿を入れてね" rows="4" cols="40" oninput="countChars()"></textarea>
-  <p>文字数: <span id="charCount">0</span></p>
-  <input type="file" id="file">
+  <input id="text" placeholder="投稿を入れてね">
   <button onclick="predict()">予測する</button>
   <p id="result"></p>
+  <canvas id="chart"></canvas>
+
+  <!-- Chart.jsライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    function countChars() {
-      const text = document.getElementById("text").value;
-      document.getElementById("charCount").textContent = text.length;
-    }
-
     function predict() {
       let text = document.getElementById("text").value;
-      let file = document.getElementById("file").files.length;
       let likes = 50; // 基本値
 
       // お得系ワード
       if (text.includes("無料") || text.includes("プレゼント")) {
         likes += 30;
       }
-
-      // 短文はバズりやすい
+      // 短い投稿
       if (text.length < 20) {
         likes += 20;
       }
-
-      // ハッシュタグがあるとバズりやすい
+      // ハッシュタグ
       if (text.includes("#")) {
         likes += 10;
       }
 
-      // ポジティブワード
-      const positiveWords = ["最高", "すごい", "楽しい", "素敵", "かわいい", "美味しい"];
-      positiveWords.forEach(word => {
-        if (text.includes(word)) {
-          likes += 15;
+      // 結果表示
+      document.getElementById("result").innerHTML = "🔥予測いいね数: " + likes + "👍";
+
+      // グラフ表示
+      const ctx = document.getElementById('chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['予測いいね数'],
+          datasets: [{
+            label: 'いいね数',
+            data: [likes],
+            backgroundColor: '#FF1744'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
         }
       });
-
-      // 画像がある場合、バズりやすい
-      if (file > 0) {
-        likes += 40;
-      }
-
-      // 曜日補正
-      const now = new Date();
-      const day = now.getDay(); // 0:日曜日, 5:金曜日, 6:土曜日
-      if (day === 5 || day === 6) {
-        likes += 25;
-      }
-
-      document.getElementById("result").innerHTML = "予測いいね数: " + likes;
     }
   </script>
 </body>
